@@ -1,122 +1,65 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useEffect } from 'react';
+import { AppShell } from './components/AppShell';
+import { useHashRoute } from './hooks/useHashRoute';
+import { useCurrentJob } from './hooks/useCurrentJob';
+import { seedMaterialsIfEmpty } from './db/seed';
+import { HomeScreen } from './features/home/HomeScreen';
+import { SurveyScreen } from './features/survey/SurveyScreen';
+import { DesignScreen } from './features/design/DesignScreen';
+import { HydraulicsScreen } from './features/hydraulics/HydraulicsScreen';
+import { MaterialsScreen } from './features/materials/MaterialsScreen';
+import { CommissioningScreen } from './features/commissioning/CommissioningScreen';
+import { SettingsScreen } from './features/settings/SettingsScreen';
+import { HelpScreen } from './features/help/HelpScreen';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [route, navigate] = useHashRoute();
+  const [currentJob, setCurrentJobId] = useCurrentJob();
+
+  useEffect(() => {
+    seedMaterialsIfEmpty();
+  }, []);
+
+  const jobId = currentJob?.id ?? null;
+
+  function renderScreen() {
+    switch (route) {
+      case 'home':
+        return (
+          <HomeScreen
+            currentJob={currentJob}
+            onSelectJob={(id) => setCurrentJobId(id)}
+            onNavigate={navigate}
+          />
+        );
+      case 'survey':
+        return <SurveyScreen jobId={jobId} />;
+      case 'design':
+        return <DesignScreen jobId={jobId} />;
+      case 'hydraulics':
+        return <HydraulicsScreen jobId={jobId} />;
+      case 'materials':
+        return <MaterialsScreen />;
+      case 'commissioning':
+        return <CommissioningScreen jobId={jobId} />;
+      case 'settings':
+        return <SettingsScreen />;
+      case 'help':
+        return <HelpScreen />;
+      default:
+        return (
+          <HomeScreen
+            currentJob={currentJob}
+            onSelectJob={(id) => setCurrentJobId(id)}
+            onNavigate={navigate}
+          />
+        );
+    }
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    <AppShell active={route} onNavigate={navigate} jobName={currentJob?.name}>
+      {renderScreen()}
+    </AppShell>
+  );
 }
-
-export default App
