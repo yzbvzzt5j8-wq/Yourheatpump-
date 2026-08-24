@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, LabelHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react';
+import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react';
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
   return <div className={`print-card rounded-lg border border-slate-200 bg-white p-4 shadow-sm ${className}`}>{children}</div>;
@@ -63,8 +63,7 @@ export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
   );
 }
 
-export function CheckboxField({ label, ...props }: LabelHTMLAttributes<HTMLLabelElement> & InputHTMLAttributes<HTMLInputElement> & { label: string }) {
-  const { className, ...inputProps } = props as InputHTMLAttributes<HTMLInputElement>;
+export function CheckboxField({ label, ...inputProps }: InputHTMLAttributes<HTMLInputElement> & { label: string }) {
   return (
     <label className="flex min-h-11 items-center gap-2 text-sm text-slate-700">
       <input type="checkbox" className="h-4 w-4 rounded border-slate-300 text-sky-700 focus:ring-sky-600" {...inputProps} />
