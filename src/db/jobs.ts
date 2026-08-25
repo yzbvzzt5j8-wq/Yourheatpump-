@@ -17,13 +17,14 @@ export async function saveJob(job: Job): Promise<void> {
 export async function deleteJobCascade(jobId: string): Promise<void> {
   await db.transaction(
     'rw',
-    [db.jobs, db.surveys, db.designs, db.arrangements, db.circuits, db.commissioningRecords, db.serviceRecords],
+    [db.jobs, db.surveys, db.designs, db.arrangements, db.circuits, db.bomLines, db.commissioningRecords, db.serviceRecords],
     async () => {
       await db.jobs.delete(jobId);
       await db.surveys.where('jobId').equals(jobId).delete();
       await db.designs.where('jobId').equals(jobId).delete();
       await db.arrangements.where('jobId').equals(jobId).delete();
       await db.circuits.where('jobId').equals(jobId).delete();
+      await db.bomLines.where('jobId').equals(jobId).delete();
       await db.commissioningRecords.where('jobId').equals(jobId).delete();
       await db.serviceRecords.where('jobId').equals(jobId).delete();
     },

@@ -67,6 +67,7 @@ export interface Kit {
 
 export interface BomLine {
   id: string;
+  jobId: string;
   materialId: string;
   quantity: number;
   wastePercent: number;

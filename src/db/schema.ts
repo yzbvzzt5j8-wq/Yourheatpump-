@@ -38,7 +38,7 @@ export class YourHeatPumpDB extends Dexie {
       arrangements: 'id, jobId, designId',
       circuits: 'id, jobId, parentId',
       materials: 'id, category, status, active',
-      bomLines: 'id, materialId',
+      bomLines: 'id, jobId, materialId',
       commissioningRecords: 'id, jobId',
       serviceRecords: 'id, jobId, serviceDate',
       settings: 'id',

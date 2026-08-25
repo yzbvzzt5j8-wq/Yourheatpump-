@@ -39,7 +39,7 @@ export default function App() {
       case 'hydraulics':
         return <HydraulicsScreen jobId={jobId} />;
       case 'materials':
-        return <MaterialsScreen />;
+        return <MaterialsScreen jobId={jobId} />;
       case 'commissioning':
         return <CommissioningScreen jobId={jobId} />;
       case 'settings':

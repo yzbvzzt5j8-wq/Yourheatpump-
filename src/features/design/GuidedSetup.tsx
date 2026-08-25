@@ -41,7 +41,9 @@ export function GuidedSetup({
 
   const [flowTempC, setFlowTempC] = useState(45);
   const [returnTempC, setReturnTempC] = useState(40);
-  const [glycolType, setGlycolType] = useState<AntifreezeSettings['glycolType']>('propylene-glycol');
+  // Defaults to 'none' — glycol must be a deliberate engineer decision, never
+  // added just because the unit is a monobloc (spec Part 4 guardrail).
+  const [glycolType, setGlycolType] = useState<AntifreezeSettings['glycolType']>('none');
   const [concentrationFraction, setConcentrationFraction] = useState(0.25);
 
   const [cylinderVolumeL, setCylinderVolumeL] = useState(210);
@@ -196,8 +198,8 @@ export function GuidedSetup({
           </div>
           <Field label="Antifreeze">
             <Select value={glycolType} onChange={(e) => setGlycolType(e.target.value as AntifreezeSettings['glycolType'])}>
-              <option value="propylene-glycol">Propylene glycol</option>
               <option value="none">None</option>
+              <option value="propylene-glycol">Propylene glycol</option>
             </Select>
           </Field>
           {glycolType !== 'none' && (
