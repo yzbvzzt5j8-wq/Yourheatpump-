@@ -20,6 +20,17 @@ describe('pump curve interpolation', () => {
   });
 });
 
+describe('NaN/undefined guards', () => {
+  it('throws on a NaN pressure drop input rather than propagating NaN into the pass/fail result', () => {
+    expect(() =>
+      evaluatePumpDuty({
+        indexPathPressureDropPa: NaN, plantPressureDropPa: 5000, emitterPressureDropPa: 3000,
+        marginFraction: 0.1, designFlowLps: 0.2, pumpCurve: curve,
+      }),
+    ).toThrow();
+  });
+});
+
 describe('pump duty pass/fail', () => {
   it('passes when available head at design flow exceeds required head + margin', () => {
     const result = evaluatePumpDuty({

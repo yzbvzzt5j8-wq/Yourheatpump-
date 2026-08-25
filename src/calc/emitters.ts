@@ -5,6 +5,7 @@
  *   output = rated_D50 x (dT_actual / 50) ^ 1.3
  *   dT_actual = mean water temperature - room temperature
  */
+import { assertFinite } from './assert';
 
 export interface EmitterOutputInput {
   ratedOutputAtD50W: number;
@@ -21,6 +22,10 @@ export interface EmitterOutputResult {
 
 export function correctedEmitterOutput(input: EmitterOutputInput): EmitterOutputResult {
   const { ratedOutputAtD50W, flowTempC, returnTempC, roomTempC } = input;
+  assertFinite(ratedOutputAtD50W, 'ratedOutputAtD50W');
+  assertFinite(flowTempC, 'flowTempC');
+  assertFinite(returnTempC, 'returnTempC');
+  assertFinite(roomTempC, 'roomTempC');
   const meanWaterTempC = (flowTempC + returnTempC) / 2;
   const deltaTActualK = meanWaterTempC - roomTempC;
   const correctedOutputW = ratedOutputAtD50W * Math.pow(deltaTActualK / 50, 1.3);

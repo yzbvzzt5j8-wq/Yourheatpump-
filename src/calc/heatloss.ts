@@ -7,6 +7,8 @@
  *   Total       = (fabric + partitions) x (1 + bridging%) + ventilation
  */
 
+import { assertFinite } from './assert';
+
 export type BFactorKey =
   | 'outsideAir'
   | 'groundFloor'
@@ -76,9 +78,16 @@ function resolveBFactor(b: BFactorKey | number): number {
 
 export function calculateRoomHeatLoss(input: RoomHeatLossInput): RoomHeatLossResult {
   const { roomTempC, externalTempC, fabric, partitions = [], volumeM3, airChangesPerHour, bridgingFraction } = input;
+  assertFinite(roomTempC, 'roomTempC');
+  assertFinite(externalTempC, 'externalTempC');
+  assertFinite(volumeM3, 'volumeM3');
+  assertFinite(airChangesPerHour, 'airChangesPerHour');
+  assertFinite(bridgingFraction, 'bridgingFraction');
   const deltaT = roomTempC - externalTempC;
 
   const fabricBreakdown = fabric.map((el) => {
+    assertFinite(el.areaM2, `fabric[${el.label}].areaM2`);
+    assertFinite(el.uValue, `fabric[${el.label}].uValue`);
     const b = resolveBFactor(el.bFactor);
     const watts = el.areaM2 * el.uValue * deltaT * b;
     return { label: el.label, areaM2: el.areaM2, uValue: el.uValue, bFactor: b, deltaT, watts };
@@ -87,6 +96,9 @@ export function calculateRoomHeatLoss(input: RoomHeatLossInput): RoomHeatLossRes
 
   // Partitions only contribute where the adjacent space is cooler (positive loss).
   const partitionBreakdown = partitions.map((p) => {
+    assertFinite(p.areaM2, `partition[${p.label}].areaM2`);
+    assertFinite(p.uValue, `partition[${p.label}].uValue`);
+    assertFinite(p.adjacentRoomTempC, `partition[${p.label}].adjacentRoomTempC`);
     const pDeltaT = roomTempC - p.adjacentRoomTempC;
     const watts = pDeltaT > 0 ? p.areaM2 * p.uValue * pDeltaT : 0;
     return { label: p.label, areaM2: p.areaM2, uValue: p.uValue, deltaT: pDeltaT, watts };

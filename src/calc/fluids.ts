@@ -10,6 +10,7 @@
  * fall out of those two calibrated factors plus the density correction below
  * — they are not independently fitted.
  */
+import { assertFinite } from './assert';
 
 export interface FluidProperties {
   /** Specific heat capacity, kJ/(kg.K) */
@@ -43,6 +44,7 @@ const WATER_TABLE: WaterTableRow[] = [
 ];
 
 function interpolateTable(tempC: number): WaterTableRow {
+  assertFinite(tempC, 'tempC');
   const clamped = Math.min(Math.max(tempC, WATER_TABLE[0].tempC), WATER_TABLE[WATER_TABLE.length - 1].tempC);
   for (let i = 0; i < WATER_TABLE.length - 1; i++) {
     const a = WATER_TABLE[i];
@@ -101,6 +103,8 @@ export function fluidProperties(glycolFraction: number, tempC: number): FluidPro
  * L/s = kW / (cp x dT x rho) x 1000
  */
 export function volumetricFlowLps(kw: number, deltaTK: number, fluid: FluidProperties): number {
+  assertFinite(kw, 'kw');
+  assertFinite(deltaTK, 'deltaTK');
   if (deltaTK <= 0) throw new Error('deltaTK must be > 0');
   return (kw / (fluid.cpKJkgK * deltaTK * fluid.densityKgM3)) * 1000;
 }

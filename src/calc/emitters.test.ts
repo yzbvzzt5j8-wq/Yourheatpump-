@@ -31,6 +31,12 @@ describe('emitter output correction', () => {
   });
 });
 
+describe('NaN/undefined guards', () => {
+  it('throws on a NaN input rather than returning NaN correctedOutputW', () => {
+    expect(() => correctedEmitterOutput({ ratedOutputAtD50W: NaN, flowTempC: 45, returnTempC: 40, roomTempC: 21 })).toThrow();
+  });
+});
+
 describe('glycol derate on emitter output', () => {
   it('25% glycol derates emitter output by ~25%', () => {
     const derated = glycolDeratedOutput(1000, 0.25);

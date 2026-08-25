@@ -91,6 +91,16 @@ describe('pipe internal volume', () => {
   });
 });
 
+describe('NaN/undefined guards', () => {
+  it('velocityMs throws on a NaN flow instead of returning NaN', () => {
+    expect(() => velocityMs(NaN, 20.2)).toThrow();
+  });
+  it('pressureDrop throws on a NaN flow instead of returning NaN', () => {
+    const water = waterProperties(40);
+    expect(() => pressureDrop(NaN, 20.2, water)).toThrow();
+  });
+});
+
 describe('velocity calculation', () => {
   it('matches area x velocity = flow', () => {
     const flowLps = 0.3;

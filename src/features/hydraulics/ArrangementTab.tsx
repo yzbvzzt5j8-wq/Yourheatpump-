@@ -6,7 +6,49 @@ import { HEAT_PUMP_CATALOGUE } from '../../data/heatPumps';
 import { ARRANGEMENTS, VALVE_ARRANGEMENT_LABELS } from '../../data/arrangements';
 import { computeHydraulics, deriveVolumeAreas } from './hydraulicsCalc';
 import { waterProperties, glycolProperties } from '../../calc/fluids';
+import { buildArrangementSchematic, checkContinuous } from './arrangementSchematic';
 import { Banner, Card, SectionHeading, StatGrid, TextInput } from '../../components/ui';
+
+const NODE_SPACING_X = 150;
+const NODE_Y_FLOW = 30;
+const NODE_Y_RETURN = 70;
+const NODE_WIDTH = 130;
+
+function ArrangementSchematicSvg({ schematic }: { schematic: ReturnType<typeof buildArrangementSchematic> }) {
+  const trunkNodeIds = schematic.edges.filter((e) => e.kind === 'flow-return').flatMap((e) => [e.from, e.to]);
+  const orderedIds = [...new Set(trunkNodeIds)];
+  const xById = new Map(orderedIds.map((id, i) => [id, 40 + i * NODE_SPACING_X]));
+  const width = 40 + orderedIds.length * NODE_SPACING_X + 40;
+
+  return (
+    <div className="overflow-x-auto">
+      <svg width={width} height={140} className="min-w-[320px]">
+        {orderedIds.slice(0, -1).map((id, i) => {
+          const x1 = (xById.get(id) ?? 0) + NODE_WIDTH / 2;
+          const x2 = (xById.get(orderedIds[i + 1]) ?? 0) + NODE_WIDTH / 2;
+          return (
+            <g key={id}>
+              <line x1={x1} y1={NODE_Y_FLOW} x2={x2} y2={NODE_Y_FLOW} stroke="#0369a1" strokeWidth={2} />
+              <line x1={x1} y1={NODE_Y_RETURN} x2={x2} y2={NODE_Y_RETURN} stroke="#94a3b8" strokeWidth={2} strokeDasharray="4 2" />
+            </g>
+          );
+        })}
+        {orderedIds.map((id) => {
+          const node = schematic.nodes.find((n) => n.id === id)!;
+          const x = xById.get(id) ?? 0;
+          return (
+            <g key={id}>
+              <rect x={x} y={NODE_Y_FLOW - 12} width={NODE_WIDTH} height={64} rx={6} fill="white" stroke="#0369a1" />
+              <text x={x + NODE_WIDTH / 2} y={NODE_Y_FLOW + 24} fontSize={10} textAnchor="middle" fill="#0f172a">
+                {node.label.length > 20 ? node.label.slice(0, 18) + '…' : node.label}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
 
 export function ArrangementTab({
   design,
@@ -37,6 +79,9 @@ export function ArrangementTab({
     existingVolumiserL: arrangement.volumiser.fitted ? arrangement.volumiser.sizeL ?? undefined : undefined,
     manufacturerMinimumOpenVolumeL,
   });
+
+  const schematic = buildArrangementSchematic(arrangement.topology, arrangement.valveArrangement, arrangement.bivalent);
+  const continuity = checkContinuous(schematic);
 
   function updateVolumiser(sizeL: number | null, reason: string) {
     onSaveArrangement({ ...arrangement, volumiser: { fitted: sizeL != null, sizeL, reason }, updatedAt: new Date().toISOString() });
@@ -122,6 +167,18 @@ export function ArrangementTab({
           DHW is taken off the primary, upstream of any separation — downstream of a buffer the cylinder gets diluted water and reheat suffers badly.
           {arrangementInfo?.hasSeparation && ` This topology requires ${arrangementInfo.separationConnections} connection(s)${arrangementInfo.requiresSecondaryPump ? ' and a secondary pump' : ''}.`}
         </p>
+      </Card>
+
+      <Card>
+        <h3 className="mb-2 text-sm font-semibold text-slate-700">Schematic</h3>
+        <p className="mb-2 text-xs text-slate-500">Flow (solid) and return (dashed) drawn as a pair. Wiring, controls and condensate belong on the electrical schematic and the manufacturer's drawing.</p>
+        <ArrangementSchematicSvg schematic={schematic} />
+        {!continuity.continuous && (
+          <Banner tone="critical">Schematic does not trace continuously — disconnected: {continuity.unreachable.join(', ')}</Banner>
+        )}
+        <ul className="mt-2 space-y-0.5 text-xs text-slate-500">
+          {schematic.safetyComponents.map((c) => <li key={c.id}>• {c.label}</li>)}
+        </ul>
       </Card>
     </div>
   );

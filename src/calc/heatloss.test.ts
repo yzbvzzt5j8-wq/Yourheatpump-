@@ -67,6 +67,36 @@ describe('partitions', () => {
   });
 });
 
+describe('NaN/undefined guards', () => {
+  it('throws rather than silently propagating NaN from an empty form field', () => {
+    expect(() =>
+      calculateRoomHeatLoss({
+        roomTempC: NaN, externalTempC: -3, fabric: [], volumeM3: 10, airChangesPerHour: 1, bridgingFraction: 0.15,
+      }),
+    ).toThrow();
+  });
+
+  it('throws on a NaN fabric element area instead of silently zeroing it out', () => {
+    expect(() =>
+      calculateRoomHeatLoss({
+        roomTempC: 21, externalTempC: -3,
+        fabric: [{ label: 'Wall', areaM2: NaN, uValue: 1, bFactor: 'outsideAir' }],
+        volumeM3: 10, airChangesPerHour: 1, bridgingFraction: 0.15,
+      }),
+    ).toThrow();
+  });
+
+  it('throws on a NaN partition temperature instead of the `dT > 0` guard silently treating it as zero loss', () => {
+    expect(() =>
+      calculateRoomHeatLoss({
+        roomTempC: 21, externalTempC: -3, fabric: [],
+        partitions: [{ label: 'Wall', areaM2: 5, uValue: 1, adjacentRoomTempC: NaN }],
+        volumeM3: 10, airChangesPerHour: 1, bridgingFraction: 0.15,
+      }),
+    ).toThrow();
+  });
+});
+
 describe('ventilation and totals', () => {
   it('ventilation = 0.33 x ACH x volume x dT', () => {
     const result = calculateRoomHeatLoss({

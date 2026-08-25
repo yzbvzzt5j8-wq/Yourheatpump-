@@ -49,6 +49,17 @@ describe('glycol properties at 25% concentration, 42.5C', () => {
   });
 });
 
+describe('NaN/undefined guards', () => {
+  it('waterProperties throws on a NaN temperature rather than returning NaN properties silently', () => {
+    expect(() => waterProperties(NaN)).toThrow();
+  });
+  it('volumetricFlowLps throws on a NaN kw or deltaT', () => {
+    const water = waterProperties(45);
+    expect(() => volumetricFlowLps(NaN, 5, water)).toThrow();
+    expect(() => volumetricFlowLps(5, NaN, water)).toThrow();
+  });
+});
+
 describe('volumetric flow', () => {
   it('kw / (cp x dT x rho) x 1000, water at 42.5C', () => {
     const water = waterProperties(42.5);

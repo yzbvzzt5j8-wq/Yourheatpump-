@@ -3,6 +3,7 @@
  * circuit? The relevant metric is head at the INDEX circuit's flow rate,
  * not the raw Pa/m figure of any one pipe.
  */
+import { assertFinite } from './assert';
 
 export interface PumpCurvePoint {
   flowLps: number;
@@ -48,6 +49,11 @@ export interface PumpDutyResult {
 
 export function evaluatePumpDuty(input: PumpDutyInput): PumpDutyResult {
   const { indexPathPressureDropPa, plantPressureDropPa, emitterPressureDropPa, marginFraction, designFlowLps, pumpCurve } = input;
+  assertFinite(indexPathPressureDropPa, 'indexPathPressureDropPa');
+  assertFinite(plantPressureDropPa, 'plantPressureDropPa');
+  assertFinite(emitterPressureDropPa, 'emitterPressureDropPa');
+  assertFinite(marginFraction, 'marginFraction');
+  assertFinite(designFlowLps, 'designFlowLps');
   const subtotal = indexPathPressureDropPa + plantPressureDropPa + emitterPressureDropPa;
   const requiredHeadPa = subtotal * (1 + marginFraction);
   const availableHeadPa = pumpHeadAtFlow(pumpCurve, designFlowLps);

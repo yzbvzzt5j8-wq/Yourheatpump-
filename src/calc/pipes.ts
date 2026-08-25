@@ -4,6 +4,7 @@
  * pressure drop guidance, section 1.A1.3).
  */
 import type { FluidProperties } from './fluids';
+import { assertFinite } from './assert';
 
 export interface PipeSize {
   /** Nominal (outside) diameter, mm */
@@ -34,6 +35,8 @@ export function velocityLimitMs(nominalMm: number): number {
 }
 
 export function velocityMs(flowLps: number, idMm: number): number {
+  assertFinite(flowLps, 'flowLps');
+  assertFinite(idMm, 'idMm');
   const flowM3s = flowLps / 1000;
   const idM = idMm / 1000;
   const areaM2 = (Math.PI / 4) * idM * idM;
@@ -71,6 +74,8 @@ export interface PressureDropResult {
 }
 
 export function pressureDrop(flowLps: number, idMm: number, fluid: FluidProperties): PressureDropResult {
+  assertFinite(fluid.densityKgM3, 'fluid.densityKgM3');
+  assertFinite(fluid.viscosityPaS, 'fluid.viscosityPaS');
   const idM = idMm / 1000;
   const v = velocityMs(flowLps, idMm);
   const reynolds = (fluid.densityKgM3 * v * idM) / fluid.viscosityPaS;
