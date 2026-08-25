@@ -13,6 +13,7 @@ export const NAV_ITEMS: NavItem[] = [
   { key: 'hydraulics', label: 'Hydraulics', icon: '🔧' },
   { key: 'materials', label: 'Materials', icon: '📦' },
   { key: 'commissioning', label: 'Commissioning', icon: '✅' },
+  { key: 'reports', label: 'Reports', icon: '📄' },
   { key: 'settings', label: 'Settings', icon: '⚙' },
   { key: 'help', label: 'Help', icon: '❓' },
 ];

@@ -9,6 +9,7 @@ import { DesignScreen } from './features/design/DesignScreen';
 import { HydraulicsScreen } from './features/hydraulics/HydraulicsScreen';
 import { MaterialsScreen } from './features/materials/MaterialsScreen';
 import { CommissioningScreen } from './features/commissioning/CommissioningScreen';
+import { ReportsScreen } from './features/reports/ReportsScreen';
 import { SettingsScreen } from './features/settings/SettingsScreen';
 import { HelpScreen } from './features/help/HelpScreen';
 
@@ -42,6 +43,8 @@ export default function App() {
         return <MaterialsScreen jobId={jobId} />;
       case 'commissioning':
         return <CommissioningScreen jobId={jobId} />;
+      case 'reports':
+        return <ReportsScreen jobId={jobId} />;
       case 'settings':
         return <SettingsScreen />;
       case 'help':
