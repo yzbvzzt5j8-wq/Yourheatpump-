@@ -1,32 +1,48 @@
-# React + TypeScript + Vite
+# YourHeatPump
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A heat pump design application for MCS-certified heating engineers,
+carrying a job from first survey through to handover and servicing.
 
-Currently, two official plugins are available:
+**This is a design aid, not MCS-certified documentation.** MCS certifies
+installers and installations, and separately approves calculation
+software. See [VALIDATION.md](./VALIDATION.md) before relying on this for
+a real design.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Stack
 
-## React Compiler
+Vite · React 19 · TypeScript · Tailwind CSS 4 · Dexie (IndexedDB) ·
+vite-plugin-pwa · Vitest · Playwright. Offline-first, no backend — data
+lives in IndexedDB with JSON export/import for backup.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```
+src/
+  calc/        pure calculation functions, fully tested — heat loss,
+               emitters, fluids, pipes, circuit tree, pump duty, system
+               volume, sound, MCS compliance, pricing
+  data/        catalogues — materials, heat pumps, radiators, arrangements
+  db/          Dexie schema, settings, backup/restore, job repository
+  export/      report templates and the resilient export chain
+  features/    survey · design · hydraulics · materials · commissioning ·
+               reports · settings · help
+  components/  shared UI
+  types/       domain model
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Scripts
+
+```
+npm run dev        # start the dev server
+npm run build      # type-check + production build
+npm test           # run the calc engine and structural test suite
+npm run test:watch # vitest in watch mode
+npm run test:e2e   # Playwright end-to-end tests
+npm run lint       # oxlint
+```
+
+## Before you rely on this for a real job
+
+Read [VALIDATION.md](./VALIDATION.md). In short: run three or four
+completed jobs with known-good figures through the app and compare the
+results before designing a live installation with it, and replace the
+illustrative heat pump/radiator catalogue data with real manufacturer
+datasheet figures first.
