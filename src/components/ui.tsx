@@ -85,9 +85,12 @@ export function StatGrid({ items }: { items: { label: string; value: string; uni
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
       {items.map((item) => (
-        <div key={item.label} className="rounded-md bg-slate-50 p-2">
+        <div key={item.label} className="min-w-0 rounded-md bg-slate-50 p-2">
           <div className="text-xs text-slate-500">{item.label}</div>
-          <div className="whitespace-nowrap text-sm font-semibold text-slate-900">
+          {/* A number+unit pair must never break mid-figure (that's the spec's actual
+              concern — "2328mm0.7" from a wrapped schedule cell). Free text with no
+              unit (e.g. a manufacturer name) is allowed to wrap instead of overflowing. */}
+          <div className={`text-sm font-semibold text-slate-900 ${item.unit ? 'whitespace-nowrap' : 'break-words'}`}>
             {item.value}
             {item.unit && <span className="ml-1 font-normal text-slate-500">{item.unit}</span>}
           </div>

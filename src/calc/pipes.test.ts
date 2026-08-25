@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { waterProperties } from './fluids';
-import { pressureDrop, velocityMs, velocityLimitMs, developedLengthM, selectPipeSize, COPPER_PIPES } from './pipes';
+import { pressureDrop, velocityMs, velocityLimitMs, developedLengthM, selectPipeSize, COPPER_PIPES, pipeInternalVolumeL } from './pipes';
 
 describe('pressure drop vs published figures', () => {
   // Reference water temperature 40C — see fluids.ts; this reproduces the
@@ -65,8 +65,29 @@ describe('pipe selection basis', () => {
     expect(result.velocityMs).toBeLessThanOrEqual(velocityLimitMs(result.size.nominalMm));
   });
 
+  it('a flow too low for even the smallest pipe falls back to the SMALLEST pipe, not the largest', () => {
+    // A tiny flow undershoots the practical minimum velocity even at 15mm.
+    // A bigger pipe would only make velocity worse, so 15mm is the sane fallback.
+    const result = selectPipeSize(0.001, water, 'velocityAnd300');
+    expect(result.size.nominalMm).toBe(15);
+    expect(result.velocityOk).toBe(false);
+  });
+
+  it('a flow too high for even the largest pipe falls back to the LARGEST pipe', () => {
+    const result = selectPipeSize(5, water, 'velocityAnd300');
+    expect(result.size.nominalMm).toBe(54);
+    expect(result.velocityOk).toBe(false);
+  });
+
   it('all copper sizes are covered smallest to largest', () => {
     expect(COPPER_PIPES.map((p) => p.nominalMm)).toEqual([15, 22, 28, 35, 42, 54]);
+  });
+});
+
+describe('pipe internal volume', () => {
+  it('= cross-section area x length, in litres', () => {
+    // 22mm (ID 20.2mm) x 10m: area = pi/4 * 0.0202^2 = 3.2047e-4 m2; x10m = 3.2047e-3 m3 = 3.2047 L
+    expect(pipeInternalVolumeL(20.2, 10)).toBeCloseTo(3.2047, 3);
   });
 });
 

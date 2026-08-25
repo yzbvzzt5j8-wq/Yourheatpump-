@@ -71,6 +71,11 @@ export function CircuitTreeEditor({
       id: uid('circuit'), jobId, parentId: null, label: 'New area', level: 'Ground floor',
       branchPoint: 'Heat pump primary', verticalM: 0, horizontalM: 5, fittingEquivalentM: 2,
       zone: 'zone-1', controlType: 'zone-1', emitterType: 'radiator', roomIds: [],
+      // Every circuit carries a real loadW (0 if unassigned) — calc/tree.ts
+      // requires it on any node that turns out to be a leaf, and a circuit's
+      // leaf-ness can change as other circuits are added/reparented, so this
+      // can never be left undefined "until rooms are picked".
+      loadW: 0,
     };
     onChange([...circuits, newCircuit]);
   }
@@ -82,6 +87,9 @@ export function CircuitTreeEditor({
         const next = { ...c, ...patch };
         if (patch.roomIds || patch.level) {
           next.label = deriveLabel(survey, next.level, next.roomIds);
+        }
+        if (patch.roomIds) {
+          next.loadW = circuitLoadW(survey, next.roomIds).loadW;
         }
         return next;
       }),

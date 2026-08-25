@@ -116,18 +116,34 @@ export function selectPipeSize(
       return { size, velocityMs: v, pressureDropPaPerM: dp, velocityOk, pressureOk, basis };
     }
   }
-  // Nothing satisfied both constraints — return the largest candidate, flagged.
-  const largest = candidates[candidates.length - 1];
-  const v = velocityMs(flowLps, largest.idMm);
-  const { pressureDropPaPerM: dp } = pressureDrop(flowLps, largest.idMm, fluid);
+  // Nothing satisfied both constraints. Which fallback is sane depends on
+  // WHY every candidate failed:
+  //  - flow too low for the whole range (even the smallest pipe undershoots
+  //    the practical minimum velocity) -> the SMALLEST pipe gets closest,
+  //    since a bigger pipe only lowers velocity further.
+  //  - flow too high for the whole range -> the LARGEST pipe gets closest.
+  const smallest = candidates[0];
+  const smallestV = velocityMs(flowLps, smallest.idMm);
+  const flowTooLowForRange = smallestV < PRACTICAL_MIN_VELOCITY_MS;
+  const fallback = flowTooLowForRange ? smallest : candidates[candidates.length - 1];
+
+  const v = velocityMs(flowLps, fallback.idMm);
+  const { pressureDropPaPerM: dp } = pressureDrop(flowLps, fallback.idMm, fluid);
   return {
-    size: largest,
+    size: fallback,
     velocityMs: v,
     pressureDropPaPerM: dp,
-    velocityOk: v <= velocityLimitMs(largest.nominalMm) && v >= PRACTICAL_MIN_VELOCITY_MS,
+    velocityOk: v <= velocityLimitMs(fallback.nominalMm) && v >= PRACTICAL_MIN_VELOCITY_MS,
     pressureOk: dp <= pressureCeiling,
     basis,
   };
+}
+
+/** Internal water volume held by a length of pipe, litres. */
+export function pipeInternalVolumeL(idMm: number, lengthM: number): number {
+  const idM = idMm / 1000;
+  const areaM2 = (Math.PI / 4) * idM * idM;
+  return areaM2 * lengthM * 1000;
 }
 
 /**
